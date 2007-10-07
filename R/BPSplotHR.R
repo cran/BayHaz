@@ -1,20 +1,25 @@
 
-CPPplotHR<-function(sample=CPPpriorSample(0),npts=101,tu="Time Unit",title=NULL){
+BPSplotHR<-function(sample=BPSpriorSample(0),npts=101,tu="Time Unit",title=NULL){
     timegrid<-seq(0,sample$hyp$T00,len=npts) # time points of interest
     if(is.null(sample$dat)){ # prior sample
-        # compute pointwise standard deviation
-        hazaSD<-sqrt((sample$hyp$q*pnorm(timegrid,sd=sample$hyp$sd,lower.tail=FALSE)/sample$hyp$b)^2+
-                2*sample$hyp$q*pnorm(sqrt(2)*timegrid,sd=sample$hyp$sd)/(2*sqrt(pi)*sample$hyp$sd*sample$hyp$b^2))
+        # compute pointwise mean and standard deviation
+        ns<-length(sample$hyp$knots)-sample$hyp$ord # number of splines
+        cormat<-matrix(NA,ns,ns)
+        for(i in 1:ns) for(j in 1:ns) cormat[i,j]<-sample$hyp$c^abs(i-j)
+        B<-splineDesign(knots=sample$hyp$knots,x=timegrid,ord=sample$hyp$ord)
+        varlogHR<-sample$hyp$w*diag(B%*%cormat%*%t(B))
+        hazaMEAN<-exp(sample$hyp$m+0.5*varlogHR)
+        hazaSD<-sqrt(exp(2*(sample$hyp$m+varlogHR))-exp(2*sample$hyp$m+varlogHR))
         # compute maximum value of interest
-        hazaMAX<-sample$hyp$r0+max(hazaSD)
+        hazaMAX<-max(hazaMEAN+hazaSD)
     } else{ # posterior sample
         # compute maximum value of interest
         hazaMAX<-max(qgamma(0.975,sum(sample$dat$obs),sum(sample$dat$times)),
                      2*sum(sample$dat$obs)/sum(sample$dat$times))
     } # end if(is.null(sample$dat))
-    ss<-nrow(sample$xi0) # sample size
+    ss<-nrow(sample$eta) # sample size
     if(ss>0){# compute hazard rates
-        hazarate<-CPPevalHR(timegrid,sample)
+        hazarate<-BPSevalHR(timegrid,sample)
         if(is.null(sample$dat)){ # prepare prior trajectories
             # create a pool of colors
             auxcol<-gray.colors(ss)
@@ -36,10 +41,10 @@ CPPplotHR<-function(sample=CPPpriorSample(0),npts=101,tu="Time Unit",title=NULL)
          ylab=paste("Events / ",tu,sep=""),main=title)
     if(is.null(sample$dat)){ # prior sample
         # plot pointwise mean
-        abline(h=sample$hyp$r0,lty="dashed")
+        lines(timegrid,hazaMEAN,lty="dashed")
         # add +/- one standard deviation band
-        lines(timegrid,sample$hyp$r0+hazaSD,lty="dashed")
-        lines(timegrid,pmax(sample$hyp$r0-hazaSD,rep(0,npts)),lty="dashed")
+        lines(timegrid,hazaMEAN+hazaSD,lty="dashed")
+        lines(timegrid,pmax(hazaMEAN-hazaSD,rep(0,npts)),lty="dashed")
         # plot prior trajectories
         if(ss>0) for(it in 1:ss) lines(timegrid,hazarate[it,],col=auxcol[it])
     }else{ # posterior sample
@@ -58,4 +63,4 @@ CPPplotHR<-function(sample=CPPpriorSample(0),npts=101,tu="Time Unit",title=NULL)
             if(sample$dat$obs[auxti]) points(sample$dat$times[auxti],0,pch="x") # exact
             else points(sample$dat$times[auxti],0,pch="o") # censored
     } # end if(is.null(sample$dat))
-} # end CPPplotHR
+} # end BPSplotHR

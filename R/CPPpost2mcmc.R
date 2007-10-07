@@ -1,5 +1,4 @@
 
-# Function to Convert CPP Posterior Samples into MCMC Objects
 CPPpost2mcmc<-function(sampost){
     chain<-cbind(sampost$sgm,sampost$xi0,sampost$csi)
     colnames(chain)<-paste(c(rep("si",sampost$hyp$F),rep("xi",sampost$hyp$F+1)),

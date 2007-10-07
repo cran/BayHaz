@@ -3,15 +3,17 @@
 \alias{BayHaz}
 \docType{package}
 \title{R Functions for Bayesian Hazard Rate Estimation}
-\description{A suite of R functions for Bayesian estimation of smooth hazard rates via Compound Poisson Process (CPP) priors.}
+\description{A suite of R functions for Bayesian estimation of smooth hazard rates via Compound Poisson Process (CPP)
+                    and Bayesian Penalized Spline (BPS) priors.}
 \details{\tabular{ll}{
 Package: \tab BayHaz\cr
 Type: \tab Package\cr
-Version: \tab 0.0-6\cr
-Date: \tab 2007-01-09\cr
+Version: \tab 0.1-3\cr
+Date: \tab 2007-10-07\cr
 License: \tab GPL Version 2 or later\cr}
 This package provides UseRs with functions to use CPP prior distributions for Bayesian analysis of times to event;
-see La Rocca (2005). It deals with prior elicitation, posterior computation, and visualization. For illustrative purposes,
+see La Rocca (2005). It also handles first order autoregressive BPS hazard rates, based on Hennerfeind \emph{et al.} (2006).
+Prior elicitation, posterior computation, and visualization are dealt with. For illustrative purposes,
 a data set in the field of earthquake statistics is supplied. Package 'coda' is suggested for output diagnostics.}
 \author{
 Luca La Rocca \url{http://www-dimat.unipv.it/luca}
@@ -19,12 +21,18 @@ Luca La Rocca \url{http://www-dimat.unipv.it/luca}
 Mantainer: Luca La Rocca \email{luca.larocca@unimore.it}
 }
 \references{
-Luca La Rocca (2005). On Bayesian Nonparametric Estimation of Smooth Hazard Rates with a View to Seismic Hazard Assessment.
-\emph{Research Report n. 38-05}, Department of Social, Cognitive and Quantitative Sciences, Reggio Emilia, Italy.
+La Rocca, L. (2005). On Bayesian Nonparametric Estimation of Smooth Hazard Rates with a View to Seismic Hazard Assessment.
+\emph{Research Report} n. 38-05, Department of Social, Cognitive and Quantitative Sciences, Reggio Emilia, Italy.
+
+Hennerfeind, A., Brezger, A. \& Fahrmeir, L. (2006). Geoadditive survival models.
+\emph{Journal of the American Statistical Association} 101, 1065--1075.
 }
 \seealso{\code{\link{CPPpriorElicit}},  \code{\link{CPPpostSample}}, \code{\link{CPPplotHR}},
-\code{\link{earthquakes}}, \code{\link{CPPpost2mcmc}}}
+\code{\link{BPSpriorElicit}},  \code{\link{BPSpostSample}}, \code{\link{BPSplotHR}},
+\code{\link{earthquakes}}, \code{\link{CPPpost2mcmc}}, \code{\link{BPSpost2mcmc}}}
 \examples{
+# the following analysis uses CPP hazard rates but can be easily adapted to BPS hazard rates
+
 # set RNG seed (for example reproducibility only)
 set.seed(1234)
 

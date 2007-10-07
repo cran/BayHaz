@@ -1,5 +1,5 @@
 
-CPPpostSample<-function(hyp,times,obs=NULL,mclen=10,burnin=0,thin=1){
+CPPpostSample<-function(hyp,times,obs=NULL,mclen=10,burnin=0,thin=1,lab=FALSE){
     # build dataset
     dat<-data.frame(times=times)
     if(is.null(obs)) dat$obs<-rep(1,n) else dat$obs<-obs
@@ -7,6 +7,7 @@ CPPpostSample<-function(hyp,times,obs=NULL,mclen=10,burnin=0,thin=1){
     n<-nrow(dat) # number of observations
     sampost<-list(dat=dat,hyp=hyp,burnin=burnin,thin=thin,
                   sgm=matrix(NA,mclen,hyp$F),xi0=matrix(NA,mclen,1),csi=matrix(NA,mclen,hyp$F))
+    if(lab) sampost$gam<-matrix(NA,mclen,n)
     # stub group handling (prior parameters for the group factor distribution are s.t. the median is one)
     dat$grp<-rep(0,n)   # all observations belong to the same group
     c<-1.31425001034535 # shape
@@ -87,12 +88,14 @@ CPPpostSample<-function(hyp,times,obs=NULL,mclen=10,burnin=0,thin=1){
                         }else if(trial<state$sgm[j]) slice$left<-trial else slice$right<-trial # shrink slice
                     } # end of try as much as needed
                 } # end of "state$sgm"
-            } # end for(mv in mvsel)
-        } # end for(mvrep in 1:thin)
+            } # end of for(mv in mvsel)
+        } # end of for(mvrep in 1:thin)
         if(mcit>extrit){ # store state for output
             sampost$sgm[mcit-extrit,]<-state$sgm
-            sampost$xi0[mcit-extrit,1]<-state$xi0
+            sampost$xi0[mcit-extrit,]<-state$xi0
             sampost$csi[mcit-extrit,]<-state$csi
+            if(lab) sampost$gam[mcit-extrit,]<-state$gam
+            if((mcit-extrit)%%1000==0) cat("MCMC iteration",mcit-extrit,fill=TRUE) # echo
         } # end of store state for output
     } # end for(mcit in 1:mclen)
     return(sampost)
